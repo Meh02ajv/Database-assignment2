@@ -1,0 +1,173 @@
+Meh Ayité Hariel Elinam Ajavon
+54392028
+Cohort A
+
+
+Case Study 2
+
+*IT RDBMS
+MariaDB [(none)]> create database it_db;
+Query OK, 1 row affected (0.048 sec)
+
+MariaDB [(none)]> use it_db;
+Database changed
+
+7.24
+MariaDB [it_db]> CREATE TABLE Department (deptNo varchar(5) PRIMARY KEY NOT NULL, deptName VARCHAR(50) NOT NULL, mgrEmpNo varchar(5) UNIQUE);
+Query OK, 0 rows affected (0.026 sec)
+
+MariaDB [it_db]> CREATE TABLE Employee (empNo varchar(5) PRIMARY KEY NOT NULL, fName VARCHAR(50) NOT NULL, lName VARCHAR(50) NOT NULL, address VARCHAR(100), DOB DATE, sex CHAR(1) CHECK (sex IN ('M','F')), position VARCHAR(20) CHECK (position IN ('Manager','Team Leader','Analyst','Software Developer')), deptNo varchar(5), FOREIGN KEY (deptNo) REFERENCES Department(deptNo));
+Query OK, 0 rows affected (0.082 sec)
+
+MariaDB [it_db]> CREATE TABLE Project (projNo varchar(5) PRIMARY KEY NOT NULL, projName VARCHAR(50) NOT NULL, deptNo varchar(5) NOT NULL, FOREIGN KEY (deptNo) REFERENCES Department(deptNo));
+Query OK, 0 rows affected (0.070 sec)
+
+MariaDB [it_db]> CREATE TABLE WorksOn (empNo varchar(5) NOT NULL, projNo varchar(5) NOT NULL, dateWorked DATE NOT NULL, hoursWorked INT CHECK (hoursWorked BETWEEN 0 AND 40), PRIMARY KEY (empNo, projNo, dateWorked), FOREIGN KEY (empNo) REFERENCES Employee(empNo), FOREIGN KEY (projNo) REFERENCES Project(projNo));
+Query OK, 0 rows affected (0.022 sec)
+
+
+MariaDB [it_db]>INSERT INTO Department (deptNo, deptName, mgrEmpNo) VALUES ('D1', 'IT Solutions', 'E1'),('D2', 'Cyber Security', 'E2'),('D3', 'Data Analytics', 'E3');
+Query OK, 3 rows affected (0.053 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+
+MariaDB [it_db]> INSERT INTO Employee (empNo, fName, lName, address, DOB, sex, position, deptNo) VALUES ('E1', 'John', 'Doe', '123 Tech Lane, NY', '1985-04-12', 'M', 'Manager', 'D1'),('E2', 'Jane', 'Smith', '456 Cyber St, CA', '1988-11-23', 'F', 'Manager', 'D2'),
+('E3', 'Alice', 'Johnson', '789 Data Blvd, TX', '1992-07-19', 'F', 'Team Leader', 'D3'),
+('E4', 'Bob', 'Brown', '101 Dev Way, SF', '1995-02-05', 'M', 'Software Developer', 'D1'),
+('E5', 'Charlie', 'Davis', '202 Analyst Rd, WA', '1990-09-30', 'M', 'Analyst', 'D3'),
+('E6', 'Eva', 'White', '303 Cloud Ct, TX', '1993-05-14', 'F', 'Software Developer', 'D1'),
+('E7', 'Frank', 'Miller', '404 Secure Way, CA', '1987-03-22', 'M', 'Team Leader', 'D2'),
+('E8', 'Grace', 'Wilson', '505 Data Dr, NY', '1996-11-01', 'F', 'Analyst', 'D3'),
+('E9', 'Henry', 'Taylor', '606 Code Rd, SF', '1994-08-17', 'M', 'Software Developer', 'D1'),('E10', 'Ivy', 'Thomas', '707 Cyber Ln, NV', '1991-12-05', 'F', 'Software Developer', 'D2');
+Query OK, 10 rows affected (0.018 sec)
+Records: 10  Duplicates: 0  Warnings: 0
+
+
+MariaDB [it_db]>INSERT INTO Project (projNo, projName, deptNo) VALUES ('SCCS', 'Cloud Migration', 'D1'),('MNNM', 'Network Overhaul', 'D2'),('BIDA', 'BI Dashboard', 'D3'),('APPD', 'App Development', 'D1');
+Query OK, 4 rows affected (0.011 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+
+MariaDB [it_db]>INSERT INTO WorksOn (empNo, projNo, dateWorked, hoursWorked) VALUES ('E1', 'SCCS', '2026-06-20', 40),('E4', 'SCCS', '2026-06-20', 35),('E6', 'SCCS', '2026-06-20', 38),('E9', 'APPD', '2026-06-22', 40),('E2', 'MNNM', '2026-06-21', 20),('E10', 'MNNM', '2026-06-21', 30),('E3', 'BIDA', '2026-06-22', 15),('E5', 'BIDA', '2026-06-22', 25);
+Query OK, 8 rows affected (0.049 sec)
+Records: 8  Duplicates: 0  Warnings: 0
+
+
+
+7.25
+MariaDB [it_db]> CREATE VIEW project_female_managers AS SELECT p.projNo, p.projName, p.deptNo FROM Project p JOIN Department d ON p.deptNo = d.deptNo JOIN Employee e ON d.mgrEmpNo = e.empNo WHERE e.sex = 'F' AND e.position = 'Manager' ORDER BY p.projNo;
+Query OK, 0 rows affected (0.076 sec)
+
+MariaDB [it_db]> select * from project_female_managers;
++--------+------------------+--------+
+| projNo | projName         | deptNo |
++--------+------------------+--------+
+| MNNM   | Network Overhaul | D2     |
++--------+------------------+--------+
+1 row in set (0.037 sec)
+
+
+
+7.26
+MariaDB [it_db]> CREATE VIEW information AS SELECT e.empNo,e.fName,e.lName,p.projName,w.hoursWorked FROM employee e JOIN department d ON d.mgrEmpNo = e.empNo JOIN WorksOn w ON d.mgrEmpNo = w.empNo JOIN project p ON p.projNo = w.projNo;
+Query OK, 0 rows affected (0.016 sec)
+
+MariaDB [it_db]> select * from information;
++-------+-------+---------+------------------+-------------+
+| empNo | fName | lName   | projName         | hoursWorked |
++-------+-------+---------+------------------+-------------+
+| E1    | John  | Doe     | Cloud Migration  |          40 |
+| E2    | Jane  | Smith   | Network Overhaul |          20 |
+| E3    | Alice | Johnson | BI Dashboard     |          15 |
++-------+-------+---------+------------------+-------------+
+3 rows in set (0.049 sec)
+
+
+
+7.27
+
+MariaDB [it_db]> CREATE VIEW EmpProject(empNo, projNo, totalHours) AS SELECT w.empNo, w.projNo, SUM(hoursWorked) FROM Employee e, Project p, WorksOn w WHERE e.empNo = w.empNo AND p.projNo = w.projNo GROUP BY w.empNo, w.projNo;
+Query OK, 0 rows affected (0.056 sec)
+
+a)
+MariaDB [it_db]> select * from EmpProject;
++-------+--------+------------+
+| empNo | projNo | totalHours |
++-------+--------+------------+
+| E1    | SCCS   |         40 |
+| E10   | MNNM   |         30 |
+| E2    | MNNM   |         20 |
+| E3    | BIDA   |         15 |
+| E4    | SCCS   |         35 |
+| E5    | BIDA   |         25 |
+| E6    | SCCS   |         38 |
+| E9    | APPD   |         40 |
++-------+--------+------------+
+8 rows in set (0.051 sec)
+
+
+b)
+MariaDB [it_db]>  SELECT projNo FROM EmpProject WHERE projNo = 'SCCS';
++--------+
+| projNo |
++--------+
+| SCCS   |
+| SCCS   |
+| SCCS   |
++--------+
+3 rows in set (0.046 sec)
+
+
+c)
+MariaDB [it_db]> SELECT COUNT(projNo) FROM EmpProject WHERE empNo = 'E1';
++---------------+
+| COUNT(projNo) |
++---------------+
+|             1 |
++---------------+
+1 row in set (0.006 sec)
+
+
+d)
+MariaDB [it_db]> SELECT empNo, totalHours FROM EmpProject GROUP BY empNo;
++-------+------------+
+| empNo | totalHours |
++-------+------------+
+| E1    |         40 |
+| E10   |         30 |
+| E2    |         20 |
+| E3    |         15 |
+| E4    |         35 |
+| E5    |         25 |
+| E6    |         38 |
+| E9    |         40 |
++-------+------------+
+8 rows in set (0.046 sec)
+
+
+General
+
+7.28
+
+MariaDB [it_db]> CREATE TABLE Part (partNo INT PRIMARY KEY,contract VARCHAR(50) NOT NULL, partCost DECIMAL(10, 2) NOT NULL);
+Query OK, 0 rows affected (0.151 sec)
+
+
+INSERT INTO Part (partNo, contract, partCost) VALUES
+(101, 'CON-2026-01', 15.50),(102, 'CON-2026-01', 1250.00),(103, 'CON-2026-02', 120.75),(104, 'CON-2026-03', 2450.75),(105, 'CON-2026-03', 250.00),(106, 'CON-2026-04', 19.95),(107, 'CON-2026-05', 3100.00),(108, 'CON-2026-05', 110.00),(109, 'CON-2026-06', 1599.99),(110, 'CON-2026-06', 423.15);
+Query OK, 10 rows affected (0.050 sec)
+Records: 10  Duplicates: 0  Warnings: 0
+
+MariaDB [it_db]> CREATE VIEW ExpensiveParts (partNo) AS SELECT DISTINCT partNo FROM Part WHERE partCost > 1000;
+Query OK, 0 rows affected (0.057 sec)
+
+MariaDB [it_db]> select * from Expensiveparts;
++--------+
+| partNo |
++--------+
+|    102 |
+|    104 |
+|    107 |
+|    109 |
++--------+
+4 rows in set (0.051 sec)
